@@ -40,5 +40,17 @@ const createUser = async (user) => {
     return res.rows[0]; 
 };
 
-module.exports = { createUserTable, createUser };
+const getAllUsers = async () => {
+  const queryText = 'SELECT id, username, email, phone_no, address, profile_pic, created_at FROM users';
+  const res = await pool.query(queryText);
+  return res.rows;
+};
+
+const getUserById = async (id) => {
+  const queryText = 'SELECT id, username, email, phone_no, address, profile_pic, created_at FROM users WHERE id = $1';
+  const res = await pool.query(queryText, [id]);
+  return res.rows[0];
+}
+
+module.exports = { createUserTable, createUser, getAllUsers, getUserById };
 

@@ -37,4 +37,47 @@ const handleUserCreation = async (req, res) => {
     }
 }
 
-module.exports = { handleUserCreation };
+const handleGetAllUsers = async (req, res) => {
+    try {
+        const users = await userModel.getAllUsers();
+
+        if (users.length == 0) {
+            return res.status(404).json({
+                message: "No users found."
+            })
+        }
+        res.status(200).json({
+            message: "Users fetched successfully!",
+            counnt: users.length,
+            users
+        });
+    }
+    catch (err) {
+        console.log("Fetch error: ", err);
+        res.status(500).json({ error: "Internal server error." });
+    }
+}
+
+const handleUserFetch = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const user = await userModel.getUserById(id);
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found!"
+            });
+        }
+        res.status(200).json({
+            message: "User found!",
+            user
+        });
+    } catch (err) {
+        console.error("Fetch error: ", err);
+        res.status(500).json({ error: "Server error while fetching user." });
+    }
+};
+
+
+
+module.exports = { handleUserCreation, handleUserFetch, handleGetAllUsers };
