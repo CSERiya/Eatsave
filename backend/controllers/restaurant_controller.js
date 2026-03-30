@@ -1,6 +1,6 @@
-const userModel = require('../models/users_model');
+const RestaurantModel = require('../models/restaurants_model');
 
-const handleUserCreation = async (req, res) => {
+const handleRestaurantCreation = async (req, res) => {
     const { username, password, email, phone_no, address, profile_pic } = req.body;
 
     if (!username || !password || !email || !phone_no || !address) {
@@ -10,7 +10,7 @@ const handleUserCreation = async (req, res) => {
     }
 
     try {
-        const newUser = await userModel.createUser({
+        const newRestaurant = await RestaurantModel.createRestaurant({
             username,
             password,
             email,
@@ -19,17 +19,17 @@ const handleUserCreation = async (req, res) => {
             profile_pic: profile_pic||null
         });
 
-        const { password: _, ...userWithoutPassword } = newUser;
+        const { password: _, ...userWithoutPassword } = newRestaurant;
 
         res.status(201).json({
-            message: "User created successfully!",
-            user: newUser
+            message: "Restaurant created successfully!",
+            restaurant: newRestaurant
         });
     }
     catch (err) {
         if (err.code === '23505') {
             return res.status(409).json({
-                error: "User with this email or phone no already exists."
+                error: "Restaurant with this email or phone no already exists."
             });
         }
         console.log("Controller error: ", err);
@@ -37,19 +37,19 @@ const handleUserCreation = async (req, res) => {
     }
 }
 
-const handleGetAllUsers = async (req, res) => {
+const handleGetAllRestaurants = async (req, res) => {
     try {
-        const users = await userModel.getAllUsers();
+        const restaurants = await RestaurantModel.getAllRestaurants();
 
-        if (users.length == 0) {
+        if (restaurants.length == 0) {
             return res.status(404).json({
-                message: "No users found."
+                message: "No restaurants found."
             })
         }
         res.status(200).json({
-            message: "Users fetched successfully!",
-            count: users.length,
-            users
+            message: "Restaurants fetched successfully!",
+            count: restaurants.length,
+            restaurants
         });
     }
     catch (err) {
@@ -58,41 +58,41 @@ const handleGetAllUsers = async (req, res) => {
     }
 }
 
-const handleUserFetch = async (req, res) => {
+const handleRestaurantFetch = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const user = await userModel.getUserById(id);
-        if (!user) {
+        const restaurant = await RestaurantModel.getRestaurantById(id);
+        if (!restaurant) {
             return res.status(404).json({
-                error: "User not found!"
+                error: "Restaurant not found!"
             });
         }
         res.status(200).json({
-            message: "User data fetched successfully!",
-            user
+            message: "Restaurant data fetched successfully!",
+            restaurant
         });
     } catch (err) {
         console.error("Fetch error: ", err);
-        res.status(500).json({ error: "Server error while fetching user." });
+        res.status(500).json({ error: "Server error while fetching restaurant." });
     }
 };
 
 
-const handleUpdateUser = async (req, res) => {
+const handleUpdateRestaurant = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
     try {
-        const user = await userModel.updateUserById(id, updateData);
-        if (!user) {
+        const restaurant = await RestaurantModel.updateRestaurantById(id, updateData);
+        if (!restaurant) {
             return res.status(404).json({
-                error: "User not found."
+                error: "Restaurant not found."
             });
         }
         res.status(200).json({
-            message: "User updated successfully!",
-            user
+            message: "Restaurant updated successfully!",
+            restaurant
         });
     }
     catch{ err } {
@@ -101,19 +101,19 @@ const handleUpdateUser = async (req, res) => {
     }
 }
 
-const handleDeleteUser = async (req, res) => {
+const handleDeleteRestaurant = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const user = await userModel.deleteUserById(id);
-        if (!user) {
+        const restaurant = await RestaurantModel.deleteRestaurantById(id);
+        if (!restaurant) {
             return res.status(404).json({
-                message: "User not found."
+                message: "Restaurant not found."
             });
         }
         return res.status(200).json({
-            message: "User deleted successfully!",
-            user
+            message: "Restaurant deleted successfully!",
+            restaurant
         });
     }
     catch (err) {
@@ -122,4 +122,4 @@ const handleDeleteUser = async (req, res) => {
     }
 }
 
-module.exports = { handleUserCreation, handleUserFetch, handleGetAllUsers, handleUpdateUser, handleDeleteUser };
+module.exports = {handleRestaurantCreation, handleGetAllRestaurants, handleRestaurantFetch, handleUpdateRestaurant, handleDeleteRestaurant };

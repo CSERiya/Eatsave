@@ -52,5 +52,36 @@ const getUserById = async (id) => {
   return res.rows[0];
 }
 
-module.exports = { createUserTable, createUser, getAllUsers, getUserById };
+const updateUserById = async (id, updates) => {
+  const fields = [];
+  const values = [id]; 
+  let index = 2; 
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) {
+      fields.push(`${key} = $${index}`);
+      values.push(value);
+      index++;
+    }
+  }
+
+  if (fields.length === 0) return null;
+
+  const queryText = `
+    UPDATE users 
+    SET ${fields.join(', ')} 
+    WHERE id = $1 
+    RETURNING *`;
+
+  const res = await pool.query(queryText, values);
+  return res.rows[0];
+};
+
+const deleteUserById = async (id) => {
+  const queryText = 'DELETE FROM users WHERE id = $1 RETURNING *';
+  const res = await pool.query(queryText, [id]);
+  return res.rows[0];
+}
+
+module.exports = { createUserTable, createUser, getAllUsers, getUserById, updateUserById, deleteUserById };
 

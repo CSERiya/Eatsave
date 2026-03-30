@@ -38,4 +38,47 @@ const createRider = async (rider) => {
     return res.rows[0]; 
 };
 
-module.exports = { createRiderTable, createRider };
+const getAllRiders = async () => {
+  const queryText = 'SELECT id, username, email, phone_no, profile_pic, created_at FROM riders';
+  const res = await pool.query(queryText);
+  return res.rows;
+};
+
+const getRiderById = async (id) => {
+  const queryText = 'SELECT id, username, email, phone_no, profile_pic, created_at FROM riders WHERE id = $1';
+  const res = await pool.query(queryText, [id]);
+  return res.rows[0];
+}
+
+const updateRiderById = async (id, updates) => {
+  const fields = [];
+  const values = [id]; 
+  let index = 2; 
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) {
+      fields.push(`${key} = $${index}`);
+      values.push(value);
+      index++;
+    }
+  }
+
+  if (fields.length === 0) return null;
+
+  const queryText = `
+    UPDATE riders 
+    SET ${fields.join(', ')} 
+    WHERE id = $1 
+    RETURNING *`;
+
+  const res = await pool.query(queryText, values);
+  return res.rows[0];
+};
+
+const deleteRiderById = async (id) => {
+  const queryText = 'DELETE FROM riders WHERE id = $1 RETURNING *';
+  const res = await pool.query(queryText, [id]);
+  return res.rows[0];
+}
+
+module.exports = { createRiderTable, createRider, getAllRiders, getRiderById, updateRiderById, deleteRiderById };

@@ -2,7 +2,7 @@ const pool = require('../config/db_config');
 
 const createRestaurantTable = async () => {
       const queryText = `
-        CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE IF NOT EXISTS restaurants (
           id SERIAL PRIMARY KEY,
           username VARCHAR(100) NOT NULL,
           email VARCHAR(100) UNIQUE NOT NULL,
@@ -40,4 +40,47 @@ const createRestaurant = async (restaurant) => {
     return res.rows[0]; 
 }
 
-module.exports = { createRestaurantTable, createRestaurant };
+const getAllRestaurants = async () => {
+  const queryText = 'SELECT id, username, email, phone_no, address, profile_pic, created_at FROM restaurants';
+  const res = await pool.query(queryText);
+  return res.rows;
+};
+
+const getRestaurantById = async (id) => {
+  const queryText = 'SELECT id, username, email, phone_no, address, profile_pic, created_at FROM restaurants WHERE id = $1';
+  const res = await pool.query(queryText, [id]);
+  return res.rows[0];
+}
+
+const updateRestaurantById = async (id, updates) => {
+  const fields = [];
+  const values = [id]; 
+  let index = 2; 
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) {
+      fields.push(`${key} = $${index}`);
+      values.push(value);
+      index++;
+    }
+  }
+
+  if (fields.length === 0) return null;
+
+  const queryText = `
+    UPDATE restaurants 
+    SET ${fields.join(', ')} 
+    WHERE id = $1 
+    RETURNING *`;
+
+  const res = await pool.query(queryText, values);
+  return res.rows[0];
+};
+
+const deleteRestaurantById = async (id) => {
+  const queryText = 'DELETE FROM restaurants WHERE id = $1 RETURNING *';
+  const res = await pool.query(queryText, [id]);
+  return res.rows[0];
+}
+
+module.exports = { createRestaurantTable, createRestaurant, getAllRestaurants, getRestaurantById, updateRestaurantById, deleteRestaurantById};
