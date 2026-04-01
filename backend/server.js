@@ -12,17 +12,6 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-// const initUserDB = async () => {
-//     try {
-//         await createUserTable();
-//         console.log("Database initialized.");
-//     }
-//     catch (err) {
-//         console.log("Database initialization failed!", err);
-//     }
-// };
-// initUserDB();
-
 createUserTable();
 createRiderTable();
 createRestaurantTable();
