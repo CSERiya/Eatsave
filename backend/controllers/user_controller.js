@@ -45,7 +45,6 @@ const requestOTP = async (req, res) => {
     if (!phone_no) return res.status(400).json({ error: "Phone number required." });
 
     try {
-        console.log(otp);
         await redisclient.set(`OTP:${phone_no}`, otp, { EX: 300 });
 
         console.log(`Sending OTP ${otp} to ${phone_no}`);
@@ -68,7 +67,7 @@ const verifyOTP = async (req, res) => {
 
         await redisclient.del(`OTP:${phone_no}`);
 
-        const user = userModel.getUserByPhone(phone_no);
+        const user = await userModel.getUserByPhone(phone_no);
         if (!user) {
             return res.status(200).json({
                 newUser: true,

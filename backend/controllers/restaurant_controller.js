@@ -1,4 +1,7 @@
 const RestaurantModel = require('../models/restaurants_model');
+const redisclient = require('../config/redis_config');
+const { sendSMS, otp } = require('../utils/sms_helper');
+const jwt = require('jsonwebtoken');
 
 const handleRestaurantCreation = async (req, res) => {
     const { username, password, email, phone_no, address, profile_pic } = req.body;
@@ -36,6 +39,63 @@ const handleRestaurantCreation = async (req, res) => {
         res.status(500).json({error: "Something went wrong on the server."})
     }
 }
+
+const requestOTP = async (req, res) => {
+    const { phone_no } = req.body;
+    if (!phone_no) return res.status(400).json({ error: "Phone number required." });
+
+    try {
+        await redisclient.set(`OTP:${phone_no}`, otp, { EX: 300 });
+
+        console.log(`Sending OTP ${otp} to ${phone_no}`);
+        await sendSMS(phone_no, otp);
+        res.status(200).json({ message: "OTP sent successfully!" });
+    }
+    catch (err) {
+        res.status(500).json({ error: "Failed to send OTP." });
+    }
+};
+
+const verifyOTP = async (req, res) => {
+    const { phone_no, otp } = req.body;
+
+    try {
+        const cachedOTP = await redisclient.get(`OTP:${phone_no}`);
+        if (!cachedOTP || cachedOTP !== otp) {
+            return res.status(401).json({ error: "Invalid or expired OTP" });
+        }
+
+        await redisclient.del(`OTP:${phone_no}`);
+
+        const restaurant = await RestaurantModel.getRestaurantByPhone(phone_no);
+        if (!restaurant) {
+            return res.status(200).json({
+                newRestaurant: true,
+                message: "OTP verified. Please complete your registration.",
+                phone_no: phone_no
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                id: restaurant.id, username: restaurant.username
+            },
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: process.env.JWT_EXPIRES_IN }
+        );
+
+        res.status(200).json({
+            message: "Login successful",
+            token: token,
+            restaurant: restaurant
+        });
+    }
+    catch (err) {
+        console.error("Verification error:", err);
+        res.status(500).json({ error: "Verification process failed!" });
+    }
+};
+
 
 const handleGetAllRestaurants = async (req, res) => {
     try {
@@ -122,4 +182,4 @@ const handleDeleteRestaurant = async (req, res) => {
     }
 }
 
-module.exports = {handleRestaurantCreation, handleGetAllRestaurants, handleRestaurantFetch, handleUpdateRestaurant, handleDeleteRestaurant };
+module.exports = {handleRestaurantCreation, handleGetAllRestaurants, handleRestaurantFetch, handleUpdateRestaurant, handleDeleteRestaurant, requestOTP, verifyOTP };

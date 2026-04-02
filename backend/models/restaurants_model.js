@@ -83,4 +83,10 @@ const deleteRestaurantById = async (id) => {
   return res.rows[0];
 }
 
-module.exports = { createRestaurantTable, createRestaurant, getAllRestaurants, getRestaurantById, updateRestaurantById, deleteRestaurantById};
+const getRestaurantByPhone = async (phone_no) => {
+  const queryText = 'SELECT * FROM restaurants where phone_no = $1';
+  const res = await pool.query(queryText, [phone_no]);
+  return res.rows[0];
+}
+
+module.exports = { createRestaurantTable, createRestaurant, getAllRestaurants, getRestaurantById, updateRestaurantById, deleteRestaurantById, getRestaurantByPhone};

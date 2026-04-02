@@ -81,4 +81,10 @@ const deleteRiderById = async (id) => {
   return res.rows[0];
 }
 
-module.exports = { createRiderTable, createRider, getAllRiders, getRiderById, updateRiderById, deleteRiderById };
+const getRiderByPhone = async (phone_no) => {
+    const queryText = 'SELECT * FROM riders where phone_no = $1';
+    const res = await pool.query(queryText, [phone_no]);
+    return res.rows[0];
+}
+
+module.exports = { createRiderTable, createRider, getAllRiders, getRiderById, updateRiderById, deleteRiderById, getRiderByPhone };
