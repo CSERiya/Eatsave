@@ -8,6 +8,7 @@ router.post("/restaurants/request-otp", restaurantController.requestOTP);
 router.post("/restaurants/verify-otp", restaurantController.verifyOTP);
 router.get("/restaurants", restaurantController.handleGetAllRestaurants);
 router.get("/restaurants/:id", authenticateToken, restaurantController.handleRestaurantFetch);
+router.get("/restaurants/menu/:id", authenticateToken, restaurantController.handleGetRestaurantMenu);
 router.put("/update/restaurants/:id", authenticateToken, restaurantController.handleUpdateRestaurant);
 router.delete("/delete/restaurants/:id", authenticateToken, restaurantController.handleDeleteRestaurant);
 

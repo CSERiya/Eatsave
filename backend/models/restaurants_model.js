@@ -89,4 +89,14 @@ const getRestaurantByPhone = async (phone_no) => {
   return res.rows[0];
 }
 
-module.exports = { createRestaurantTable, createRestaurant, getAllRestaurants, getRestaurantById, updateRestaurantById, deleteRestaurantById, getRestaurantByPhone};
+const getRestaurantWithMenu = async (id) => {
+  const queryText = `
+  SELECT r.*, m.item_name, m.price, m.category FROM restaurants r
+  LEFT JOIN menuItems m on r.id = m.restaurant_id
+  WHERE r.id = $1;
+  `;
+  const res = await pool.query(queryText, [id]);
+  return res.rows;
+};
+
+module.exports = { createRestaurantTable, createRestaurant, getAllRestaurants, getRestaurantById, updateRestaurantById, deleteRestaurantById, getRestaurantByPhone, getRestaurantWithMenu};

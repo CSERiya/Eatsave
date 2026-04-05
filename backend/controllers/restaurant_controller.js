@@ -161,6 +161,41 @@ const handleUpdateRestaurant = async (req, res) => {
     }
 }
 
+const handleGetRestaurantMenu = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const restaurant = await RestaurantModel.getRestaurantWithMenu(id);
+
+        if (!restaurant) {
+            return res.status(404).json({
+                message: "Restaurant not found."
+            });
+        }
+
+        const restaurantData = {
+            id: rows[0].id,
+            username: rows[0].username,
+            address: rows[0].address,
+            profile_pic: rows[0].profile_pic,
+            menu: rows[0].item_name ? rows.map(row => ({
+                item_name: row.item_name,
+                price: row.price,
+                category: row.category
+            })) : []
+        };
+
+        return res.status(200).json({
+            message: "Menu fetched successfully!",
+            restaurant: restaurantData
+        });
+    }
+    catch (err) {
+        console.log("Fetch error: ", err);
+        res.status(500).json({message: "Internal Server Error."})
+    }
+}
+
 const handleDeleteRestaurant = async (req, res) => {
     const { id } = req.params;
 
@@ -182,4 +217,4 @@ const handleDeleteRestaurant = async (req, res) => {
     }
 }
 
-module.exports = {handleRestaurantCreation, handleGetAllRestaurants, handleRestaurantFetch, handleUpdateRestaurant, handleDeleteRestaurant, requestOTP, verifyOTP };
+module.exports = {handleRestaurantCreation, handleGetAllRestaurants, handleRestaurantFetch, handleUpdateRestaurant, handleDeleteRestaurant, requestOTP, verifyOTP, handleGetRestaurantMenu };
